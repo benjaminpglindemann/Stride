@@ -330,10 +330,12 @@ function ParsedStep({
         <div className="grid grid-cols-4 gap-px bg-rule border border-rule rounded-sm overflow-hidden">
           {SUMMARY.map(({ label, value, unit }) => (
             <div key={label} className="bg-paper px-3.5 py-3.5 flex flex-col gap-1">
-              <span className="font-sans text-[10px] tracking-[0.14em] uppercase text-ink-4">{label}</span>
-              <span className="font-mono text-[19px] text-ink tracking-[-0.02em] tabular-nums">
+              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-4)' }}>
+                {label}
+              </span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 19, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums', color: 'var(--ink)' }}>
                 {value}
-                {unit && <span className="text-[11px] text-ink-3 ml-[3px]">{unit}</span>}
+                {unit && <span style={{ fontSize: 11, color: 'var(--ink-3)', marginLeft: 3 }}>{unit}</span>}
               </span>
             </div>
           ))}
