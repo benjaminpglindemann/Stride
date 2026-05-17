@@ -42,19 +42,24 @@ export default function RegisterForm() {
       return;
     }
 
-    // 2. Insert athlete profile
-    const { error: insertError } = await supabase.from('athletes').insert({
-      id:            data.user.id,
-      email:         form.email,
-      name:          form.name,
-      sport:         form.sport,
-      goal:          form.goal,
-      training_plan: form.plan,
-      units:         form.units,
+    // 2. Insert athlete profile via server API (uses service role to bypass RLS)
+    const res = await fetch('/api/athlete/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id:            data.user.id,
+        email:         form.email,
+        name:          form.name,
+        sport:         form.sport,
+        goal:          form.goal,
+        training_plan: form.plan,
+        units:         form.units,
+      }),
     });
 
-    if (insertError) {
-      setError(insertError.message);
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      setError(body || 'Profile creation failed.');
       setLoading(false);
       return;
     }
