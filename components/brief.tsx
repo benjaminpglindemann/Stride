@@ -5,14 +5,14 @@ import type { Prescription } from '@/types';
 
 interface BriefProps {
   initialText: string;
-  generatedAt: string;
+  hasWorkouts: boolean;
   rx: Prescription;
 }
 
-export default function Brief({ initialText, generatedAt, rx }: BriefProps) {
+export default function Brief({ initialText, hasWorkouts, rx }: BriefProps) {
   const [briefText, setBriefText] = useState(initialText);
   const [loading, setLoading] = useState(false);
-  const [generatedTime, setGeneratedTime] = useState(generatedAt);
+  const [generatedTime, setGeneratedTime] = useState<string | null>(null);
 
   const regenerate = async () => {
     setLoading(true);
@@ -46,16 +46,16 @@ export default function Brief({ initialText, generatedAt, rx }: BriefProps) {
         <div className="font-sans text-[11.5px] text-ink-4 tracking-[0.08em] uppercase flex items-center gap-[10px]">
           <span className="whitespace-nowrap">Today&apos;s brief</span>
           <span className="flex-1 h-px bg-rule" />
-          <span className="whitespace-nowrap">Generated {generatedTime}</span>
+          {generatedTime && (
+            <span className="whitespace-nowrap">Generated {generatedTime}</span>
+          )}
         </div>
 
         {/* Drop */}
         {loading ? (
           <p className="font-serif text-[26px] leading-[1.32] tracking-[-0.012em] text-ink-4 italic text-pretty">
-            Reading 8 weeks of data, your plan, and today&apos;s context…{' '}
-            <span className="dots">
-              <i /><i /><i />
-            </span>
+            Reading your training data and context…{' '}
+            <span className="dots"><i /><i /><i /></span>
           </p>
         ) : (
           <div
@@ -64,23 +64,23 @@ export default function Brief({ initialText, generatedAt, rx }: BriefProps) {
           />
         )}
 
-        {/* Refresh */}
-        <button
-          onClick={regenerate}
-          disabled={loading}
-          className="self-start bg-transparent border border-rule px-3 py-1.5 rounded-full font-sans text-[12px] text-ink-3 flex items-center gap-2 hover:border-ink hover:text-ink transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          <span>↻</span>
-          <span>{loading ? 'Regenerating…' : 'Regenerate from latest data'}</span>
-        </button>
+        {/* Refresh — only shown once the user has workouts */}
+        {hasWorkouts && (
+          <button
+            onClick={regenerate}
+            disabled={loading}
+            className="self-start bg-transparent border border-rule px-3 py-1.5 rounded-full font-sans text-[12px] text-ink-3 flex items-center gap-2 hover:border-ink hover:text-ink transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            <span>↻</span>
+            <span>{loading ? 'Regenerating…' : 'Regenerate from latest data'}</span>
+          </button>
+        )}
       </div>
 
       {/* Right — Prescription */}
       <aside className="bg-paper-2 border border-rule rounded-lg p-6 flex flex-col gap-[18px] relative">
-        {/* oxblood top bar */}
         <div className="absolute top-0 left-6 right-6 h-[3px] bg-accent rounded-t-sm" />
 
-        {/* Header */}
         <div className="flex justify-between items-baseline">
           <div>
             <div className="font-sans text-[10.5px] tracking-[0.18em] uppercase text-ink-4 mb-1.5">
@@ -93,7 +93,6 @@ export default function Brief({ initialText, generatedAt, rx }: BriefProps) {
           </span>
         </div>
 
-        {/* Targets grid */}
         <div className="grid grid-cols-3 gap-px bg-rule border border-rule rounded-sm overflow-hidden">
           {[
             { label: 'Distance', value: rx.distance },
@@ -107,7 +106,6 @@ export default function Brief({ initialText, generatedAt, rx }: BriefProps) {
           ))}
         </div>
 
-        {/* Focus points */}
         <div className="flex flex-col gap-2">
           <span className="font-sans text-[10px] tracking-[0.14em] uppercase text-ink-4">Focus points</span>
           <ol className="rx-focus-list">

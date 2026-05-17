@@ -16,7 +16,7 @@ interface Props {
   weeks: Week[];
   sessionsThisWeek: Session[];
   briefText: string;
-  briefGeneratedAt: string;
+  hasWorkouts: boolean;
   rx: Prescription;
   plannerRec: PlannerRec;
 }
@@ -26,7 +26,7 @@ export default function Dashboard({
   weeks,
   sessionsThisWeek,
   briefText,
-  briefGeneratedAt,
+  hasWorkouts,
   rx,
   plannerRec,
 }: Props) {
@@ -53,7 +53,7 @@ export default function Dashboard({
 
         <Masthead athlete={athlete} weeks={weeks} />
 
-        <Brief initialText={briefText} generatedAt={briefGeneratedAt} rx={rx} />
+        <Brief initialText={briefText} hasWorkouts={hasWorkouts} rx={rx} />
 
         {/* Performance */}
         <section>

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase-server-client';
 import { getWeeksForAthlete, getSessionsThisWeek } from '@/lib/db-queries';
 import Dashboard from '@/components/dashboard';
-import { todaysBrief, todaysRx, plannerRec } from '@/lib/mock-data';
+import { todaysRx, plannerRec } from '@/lib/mock-data';
 import type { Athlete } from '@/types';
 
 export default async function Page() {
@@ -35,13 +35,18 @@ export default async function Page() {
         plan:     '',
       };
 
+  const hasWorkouts = weeks.length > 0;
+  const briefText   = hasWorkouts
+    ? ''   // empty — Brief will generate live on first load
+    : "The first run's always the hardest. Upload it below and the coach will have something real to say.";
+
   return (
     <Dashboard
       athlete={athlete}
       weeks={weeks}
       sessionsThisWeek={sessionsThisWeek}
-      briefText={todaysBrief.text}
-      briefGeneratedAt={todaysBrief.generatedAt}
+      briefText={briefText}
+      hasWorkouts={hasWorkouts}
       rx={todaysRx}
       plannerRec={plannerRec}
     />
