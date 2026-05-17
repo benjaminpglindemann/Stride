@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Athlete, Week, Session, Prescription, PlannerRec } from '@/types';
 import Topbar from './topbar';
 import Masthead from './masthead';
@@ -30,6 +31,7 @@ export default function Dashboard({
   rx,
   plannerRec,
 }: Props) {
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [savedCount, setSavedCount] = useState(0);
   const [showToast, setShowToast] = useState(false);
@@ -39,6 +41,7 @@ export default function Dashboard({
     setSavedCount(c => c + 1);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3200);
+    router.refresh(); // re-fetch server data so chart + masthead update immediately
   };
 
   const currentWeek = weeks.length > 0 ? weeks[weeks.length - 1] : null;
