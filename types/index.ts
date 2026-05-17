@@ -5,6 +5,7 @@ export interface Athlete {
   goal: string;
   units: string;
   plan: string;
+  coachingNotes?: string;
 }
 
 export interface Week {

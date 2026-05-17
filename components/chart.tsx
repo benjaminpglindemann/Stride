@@ -64,6 +64,16 @@ function synthesizeSessions(week: Week): Session[] {
 }
 
 export default function Chart({ weeks, sessionsThisWeek }: Props) {
+  if (weeks.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3 border border-dashed border-rule rounded-lg bg-paper-2 mt-2">
+        <p className="font-serif italic text-[22px] text-ink-3">No training data yet.</p>
+        <p className="font-sans text-[13px] text-ink-4 text-center max-w-[320px] text-pretty">
+          Upload your first workout below to start tracking distance, pace, HR, and weekly trends.
+        </p>
+      </div>
+    );
+  }
   const [metric, setMetric] = useState<MetricKey>('km');
   const [rangeId, setRangeId] = useState<RangeId>('8w');
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);

@@ -6,9 +6,9 @@ export default function Masthead({ athlete, weeks }: { athlete: Athlete; weeks: 
   const dateStr = now.toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
   });
-  const thisWeek = weeks[weeks.length - 1];
-  const lastWeek = weeks[weeks.length - 2];
-  const diff = thisWeek.km - lastWeek.km;
+  const thisWeek = weeks.length > 0 ? weeks[weeks.length - 1] : null;
+  const lastWeek = weeks.length > 1 ? weeks[weeks.length - 2] : null;
+  const diff     = thisWeek && lastWeek ? thisWeek.km - lastWeek.km : null;
   const firstName = athlete.name.split(' ')[0];
 
   return (
@@ -28,17 +28,21 @@ export default function Masthead({ athlete, weeks }: { athlete: Athlete; weeks: 
 
       {/* Right */}
       <div className="font-sans text-[13px] text-ink-3 text-right flex flex-col gap-[6px] shrink-0">
-        <span>
-          This week so far ·{' '}
-          <strong className="text-ink font-semibold">{thisWeek.km.toFixed(1)}km</strong>
-        </span>
-        <span>
-          {diff > 0 ? `+${diff.toFixed(1)}km` : `${diff.toFixed(1)}km`} vs. last · {thisWeek.sessions} sessions
-        </span>
-        <span>
-          Resting HR <strong className="text-ink font-semibold">48</strong> bpm · sleep{' '}
-          <strong className="text-ink font-semibold">7h 12m</strong>
-        </span>
+        {thisWeek ? (
+          <>
+            <span>
+              This week so far ·{' '}
+              <strong className="text-ink font-semibold">{thisWeek.km.toFixed(1)}km</strong>
+            </span>
+            <span>
+              {diff !== null
+                ? (diff > 0 ? `+${diff.toFixed(1)}km` : `${diff.toFixed(1)}km`)
+                : '—'} vs. last · {thisWeek.sessions} sessions
+            </span>
+          </>
+        ) : (
+          <span className="text-ink-4 italic font-serif text-[14px]">No workouts yet</span>
+        )}
       </div>
 
     </div>

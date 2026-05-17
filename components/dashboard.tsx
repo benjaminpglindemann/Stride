@@ -41,7 +41,7 @@ export default function Dashboard({
     setTimeout(() => setShowToast(false), 3200);
   };
 
-  const currentWeek = weeks[weeks.length - 1];
+  const currentWeek = weeks.length > 0 ? weeks[weeks.length - 1] : null;
   const now         = new Date();
   const weekNum     = Math.ceil((((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 86400000) + 1) / 7);
 
@@ -60,7 +60,7 @@ export default function Dashboard({
           <div className="flex items-baseline justify-between mt-14 mb-[18px] pb-3 border-b border-rule gap-4">
             <h2 className="font-serif text-[28px] text-ink">The week in numbers</h2>
             <span className="font-sans text-[12px] text-ink-3 tracking-[0.06em] uppercase">
-              Week {weekNum} · {now.getFullYear()} · {currentWeek.km.toFixed(1)}km this week
+              Week {weekNum} · {now.getFullYear()}{currentWeek ? ` · ${currentWeek.km.toFixed(1)}km this week` : ''}
             </span>
           </div>
           <Chart weeks={weeks} sessionsThisWeek={sessionsThisWeek} />

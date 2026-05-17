@@ -4,23 +4,50 @@ function weekLine(w: Week) {
   return `${w.label}: ${w.km}km, avgHR ${w.avgHr}, cad ${w.avgCadence}, VO ${w.vo}cm, best pace ${w.bestPace}/km`;
 }
 
-export function briefPrompt(athlete: Athlete, weeks: Week[]): string {
-  return `You are an analytical, evidence-based endurance running coach. Tone: direct, neutral, no motivational filler, no platitudes. Every claim references a specific number from the data.
+function weeksSection(weeks: Week[]): string {
+  return weeks.length > 0
+    ? `RECENT WEEKS (oldest first): ${weeks.map(weekLine).join(' | ')}`
+    : 'RECENT WEEKS: No workout history yet — this is the athlete\'s first session.';
+}
 
-Generate a 2-3 sentence briefing for the athlete on where they currently stand in training. Use *italic* tags for emphasis (the UI renders *italic* as red italic).
+function coachingNotesSection(athlete: Athlete): string {
+  return athlete.coachingNotes?.trim()
+    ? `\nATHLETE COACHING PREFERENCES: ${athlete.coachingNotes}\n`
+    : '';
+}
+
+function basePersona(athlete: Athlete): string {
+  return `You are an analytical, evidence-based endurance running coach. Tone: direct, neutral, no motivational filler, no platitudes. Every claim references a specific number from the data.${coachingNotesSection(athlete)}`;
+}
+
+export function briefPrompt(athlete: Athlete, weeks: Week[]): string {
+  if (weeks.length === 0) {
+    return `${basePersona(athlete)}
+
+The athlete has just signed up and has no workout history yet. Generate a 2-3 sentence opening message welcoming them and explaining what you'll be able to tell them once they upload their first run. Reference their goal specifically. Use *italic* for 1-2 emphasis phrases.
+
+ATHLETE: ${athlete.name}, goal: ${athlete.goal || '(not set yet)'}
+PLAN: ${athlete.plan || '(not set yet)'}
+
+Output: 2-3 sentences only. Plain text, no headings.`;
+  }
+
+  return `${basePersona(athlete)}
+
+Generate a 2-3 sentence briefing on where the athlete currently stands in training. Use *italic* tags for emphasis (the UI renders *italic* as red italic).
 
 ATHLETE: ${athlete.name}, goal: ${athlete.goal}
 PLAN: ${athlete.plan}
-RECENT WEEKS (oldest first): ${weeks.map(weekLine).join(' | ')}
+${weeksSection(weeks)}
 
 Output rules: 2-3 sentences only. Mention specific weekly distance, a trend (cadence or VO or HR), and a forward-looking observation tied to the goal. Wrap 2-3 short phrases in *italic* tags. Plain text — no markdown headings, no bullet points.`;
 }
 
 export function analyzePrompt(athlete: Athlete, parsed: ParsedWorkout, weeks: Week[]): string {
-  return `You are an analytical, evidence-based endurance running coach. Tone: direct, neutral, no motivational filler. Every claim references a specific number.
+  return `${basePersona(athlete)}
 
-ATHLETE: ${athlete.name} | Goal: ${athlete.goal}
-PLAN: ${athlete.plan}
+ATHLETE: ${athlete.name} | Goal: ${athlete.goal || '(not set)'}
+PLAN: ${athlete.plan || '(not set)'}
 
 JUST-UPLOADED SESSION:
 - Type: ${parsed.type} | Distance: ${parsed.distance}km | Duration: ${parsed.duration}
@@ -28,23 +55,22 @@ JUST-UPLOADED SESSION:
 - Avg cadence: ${parsed.avgCadence}spm | Vertical oscillation: ${parsed.verticalOscillation}cm
 - Splits: ${parsed.splits.map(s => `km${s.km} ${s.pace} ${s.hr}bpm ${s.cadence}spm`).join('; ')}
 
-RECENT WEEKS (oldest first):
-${weeks.map(weekLine).join('\n')}
+${weeksSection(weeks)}
 
-Analyse this session. Cover: performance vs. targets (pace, HR, cadence), what deviated and why, comparison to the last 2-3 similar sessions if visible in weekly data, and 2-3 specific things to watch next time. Use **bold** for key numbers. Keep it to 3-4 tight paragraphs. Pay attention section as a short bullet list prefixed with "- ".`;
+Analyse this session. Cover: performance vs. targets (pace, HR, cadence), what deviated and why, comparison to recent sessions if history exists, and 2-3 specific things to watch next time. Use **bold** for key numbers. Keep it to 3-4 tight paragraphs. End with a short bullet list prefixed "- " for pay-attention points.`;
 }
 
 export function chatSystemPrompt(athlete: Athlete, parsed: ParsedWorkout, weeks: Week[], initialAnalysis: string): string {
-  return `You are an analytical, evidence-based endurance running coach. Tone: direct, neutral, no motivational filler. Reference specific numbers from the data.
+  return `${basePersona(athlete)}
 
-ATHLETE: ${athlete.name} | Goal: ${athlete.goal}
-PLAN: ${athlete.plan}
+ATHLETE: ${athlete.name} | Goal: ${athlete.goal || '(not set)'}
+PLAN: ${athlete.plan || '(not set)'}
 
 SESSION CONTEXT:
 - ${parsed.type}, ${parsed.distance}km in ${parsed.duration}, avg ${parsed.avgPace}/km, HR ${parsed.avgHr}
 - Splits: ${parsed.splits.map(s => `km${s.km} ${s.pace}`).join('; ')}
 
-RECENT WEEKS: ${weeks.slice(-4).map(weekLine).join(' | ')}
+${weeksSection(weeks)}
 
 INITIAL ANALYSIS YOU GAVE:
 ${initialAnalysis}
@@ -53,12 +79,13 @@ Continue the conversation. Keep replies tight — 2-4 paragraphs max unless aske
 }
 
 export function planSystemPrompt(athlete: Athlete, rec: PlannerRec, weeks: Week[]): string {
-  return `You are an analytical, evidence-based endurance running coach. Tone: direct, neutral. Reference specific numbers.
+  const thisWeek = weeks[weeks.length - 1];
+  return `${basePersona(athlete)}
 
-ATHLETE: ${athlete.name} | Goal: ${athlete.goal}
-PLAN: ${athlete.plan}
+ATHLETE: ${athlete.name} | Goal: ${athlete.goal || '(not set)'}
+PLAN: ${athlete.plan || '(not set)'}
 
-THIS WEEK SO FAR: ${weeks[weeks.length - 1]?.km ?? 0}km / ${weeks[weeks.length - 1]?.sessions ?? 0} sessions. Last 8 weeks volume: ${weeks.map(w => w.km).join(', ')}km.
+${thisWeek ? `THIS WEEK SO FAR: ${thisWeek.km}km / ${thisWeek.sessions} sessions. Last ${weeks.length} weeks volume: ${weeks.map(w => w.km).join(', ')}km.` : 'No workout history yet.'}
 
 RECOMMENDED NEXT SESSION: ${rec.type}, ${rec.when}, ${rec.distance} at ${rec.pace}, HR ${rec.hr}. Focus: ${rec.focus}
 

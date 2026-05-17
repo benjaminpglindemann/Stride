@@ -1,6 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Week, Session } from '@/types';
-import { weeks as mockWeeks, sessionsThisWeek as mockSessions } from './mock-data';
 
 /* ── Weekly aggregation ── */
 
@@ -65,7 +64,7 @@ export async function getWeeksForAthlete(
     .gte('started_at', since.toISOString())
     .order('started_at', { ascending: true });
 
-  if (!data || data.length === 0) return mockWeeks;
+  if (!data || data.length === 0) return [];
   return aggregateToWeeks(data as WorkoutRow[]);
 }
 
@@ -84,7 +83,7 @@ export async function getSessionsThisWeek(
     .gte('started_at', weekStart.toISOString())
     .order('started_at', { ascending: true });
 
-  if (!data || data.length === 0) return mockSessions;
+  if (!data || data.length === 0) return [];
   return data.map(mapToSession);
 }
 

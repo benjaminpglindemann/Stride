@@ -19,10 +19,15 @@ export default function Topbar({ athlete }: { athlete: Athlete }) {
 
         {/* Nav */}
         <nav className="flex items-center gap-7">
-          {(['Dashboard', 'Workout history', 'Plan', 'Profile'] as const).map((label) => (
+          {([
+            { label: 'Dashboard', href: '/' },
+            { label: 'Workout history', href: '#' },
+            { label: 'Plan', href: '#' },
+            { label: 'Settings', href: '/settings' },
+          ] as const).map(({ label, href }) => (
             <a
               key={label}
-              href="#"
+              href={href}
               className={[
                 'font-sans text-[13px] no-underline tracking-[0.01em] transition-colors duration-150',
                 label === 'Dashboard' ? 'text-ink' : 'text-ink-3 hover:text-accent',

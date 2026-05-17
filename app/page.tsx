@@ -23,7 +23,8 @@ export default async function Page() {
         sport:    row.sport,
         goal:     row.goal,
         units:    row.units,
-        plan:     row.training_plan,
+        plan:          row.training_plan,
+        coachingNotes: row.coaching_notes ?? '',
       }
     : {
         name:     user.email?.split('@')[0] ?? 'Athlete',
