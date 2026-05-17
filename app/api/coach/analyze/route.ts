@@ -1,3 +1,5 @@
+export const maxDuration = 60;
+
 import { createClient } from '@/lib/supabase-server-client';
 import { streamResponse, MODEL } from '@/lib/anthropic';
 import { analyzePrompt } from '@/lib/prompts';

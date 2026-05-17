@@ -40,8 +40,11 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
   }, []);
 
   const parseFile = async (file: File): Promise<void> => {
+    // Read as text first so we can strip BOM before handing to Papa
+    const text = await file.text();
+    const stripped = text.replace(/^﻿/, '');
     return new Promise((resolve) => {
-      Papa.parse(file, {
+      Papa.parse(stripped, {
         header: true,
         skipEmptyLines: true,
         complete: (result) => {
