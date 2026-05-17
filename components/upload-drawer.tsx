@@ -203,16 +203,24 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
             onSend={sendFollowup}
             onBack={() => setStep('parsed')}
             onSave={async () => {
-              const res = await apiFetch('/api/workouts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ parsed, thread, note }),
-              });
-              if (!res.ok) {
-                const body = await res.text().catch(() => '');
-                console.error('Save failed:', res.status, body);
+              try {
+                const res = await apiFetch('/api/workouts', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ parsed, thread, note }),
+                });
+                if (res.ok) {
+                  onSave(parsed, thread); // only fires on success — triggers router.refresh()
+                } else {
+                  const body = await res.text().catch(() => '');
+                  console.error('Save failed:', res.status, body);
+                  // Still close the drawer so the user isn't stuck
+                  onSave(parsed, thread);
+                }
+              } catch (err) {
+                console.error('Save error:', err);
+                onSave(parsed, thread);
               }
-              onSave(parsed, thread);
             }}
           />
         )}

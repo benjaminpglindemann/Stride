@@ -41,7 +41,8 @@ export default function Dashboard({
     setSavedCount(c => c + 1);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3200);
-    router.refresh(); // re-fetch server data so chart + masthead update immediately
+    // Refresh server data after a brief delay to let the DB commit settle
+    setTimeout(() => router.refresh(), 300);
   };
 
   const currentWeek = weeks.length > 0 ? weeks[weeks.length - 1] : null;
