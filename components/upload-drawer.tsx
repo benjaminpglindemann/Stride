@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { Athlete, Week, ParsedWorkout, ChatMessage } from '@/types';
 import { sampleParsed } from '@/lib/mock-data';
 import { renderMd } from '@/lib/utils';
-import { parseGarminRow } from '@/lib/garmin-parse';
-import Papa from 'papaparse';
+import { parseGarminCSV } from '@/lib/garmin-parse';
 
 interface Props {
   athlete: Athlete;
@@ -40,30 +39,11 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
   }, []);
 
   const parseFile = async (file: File): Promise<void> => {
-    // Read as text first so we can strip BOM before handing to Papa
-    const text = await file.text();
-    const stripped = text.replace(/^﻿/, '');
-    return new Promise((resolve) => {
-      Papa.parse(stripped, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (result) => {
-          const row = result.data[0] as Record<string, string>;
-          if (row && Object.keys(row).length > 3) {
-            setParsed(parseGarminRow(row, file.name));
-          } else {
-            setParsed(sampleParsed);
-          }
-          setStep('parsed');
-          resolve();
-        },
-        error: () => {
-          setParsed(sampleParsed);
-          setStep('parsed');
-          resolve();
-        },
-      });
-    });
+    const text    = await file.text();
+    const stripped = text.replace(/^﻿/u, '');
+    const result  = parseGarminCSV(stripped, file.name);
+    setParsed(result ?? sampleParsed);
+    setStep('parsed');
   };
 
   const startParse = async (file?: File) => {
