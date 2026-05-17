@@ -1,13 +1,13 @@
 export const maxDuration = 60;
 
-import { createClient } from '@/lib/supabase-server-client';
+import { createRouteClient } from '@/lib/supabase-route-client';
 import { streamResponse, MODEL } from '@/lib/anthropic';
 import { planSystemPrompt, threadToMessages } from '@/lib/prompts';
 import { getWeeksForAthlete } from '@/lib/db-queries';
 import type { ChatMessage, PlannerRec } from '@/types';
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const supabase = createRouteClient(request);
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return new Response('Unauthorized', { status: 401 });
 

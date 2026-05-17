@@ -1,9 +1,9 @@
-import { createClient } from '@/lib/supabase-server-client';
+import { createRouteClient } from '@/lib/supabase-route-client';
 import { paceToSec } from '@/lib/utils';
 import type { ParsedWorkout, ChatMessage } from '@/types';
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
+  const supabase = createRouteClient(request);
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return new Response('Unauthorized', { status: 401 });
 
