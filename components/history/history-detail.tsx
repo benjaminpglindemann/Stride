@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { apiFetch } from '@/lib/api-fetch';
 import { useRouter } from 'next/navigation';
 import Topbar from '@/components/topbar';
 import { renderMd } from '@/lib/utils';
@@ -29,8 +30,8 @@ export default function HistoryDetail({ workoutId }: { workoutId: string }) {
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/workouts/${workoutId}`, { credentials: 'include' }).then(r => r.ok ? r.json() : null),
-      fetch('/api/athlete/me',            { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+      apiFetch(`/api/workouts/${workoutId}`).then(r => r.ok ? r.json() : null),
+      apiFetch('/api/athlete/me').then(r => r.ok ? r.json() : null),
     ]).then(([w, a]) => {
       if (w) { setWorkout(w); setThread(w.transcript ?? []); }
       if (a?.name) setAthlete(a);
@@ -52,8 +53,7 @@ export default function HistoryDetail({ workoutId }: { workoutId: string }) {
     setThread(t => [...t, { role: 'ai', text: '' }]);
     try {
       const workoutContext = `${workout.type}, ${workout.distance}km in ${workout.duration}, avg ${workout.avgPace}/km, HR ${workout.avgHr} (max ${workout.maxHr}), cadence ${workout.avgCadence}spm`;
-      const res = await fetch('/api/coach/history-chat', {
-        method: 'POST', credentials: 'include',
+      const res = await apiFetch('/api/coach/history-chat', {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workoutId, thread: next.slice(0, -1), message: text, workoutContext }),
       });

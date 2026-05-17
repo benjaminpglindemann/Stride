@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import { apiFetch } from '@/lib/api-fetch';
 import { useRouter } from 'next/navigation';
 import Sparkline from './sparkline';
 import Topbar from '@/components/topbar';
@@ -39,8 +40,8 @@ export default function HistoryList() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/workouts/list', { credentials: 'include' }).then(r => r.json()),
-      fetch('/api/athlete/me',    { credentials: 'include' }).then(r => r.json()).catch(() => null),
+      apiFetch('/api/workouts/list').then(r => r.json()),
+      apiFetch('/api/athlete/me').then(r => r.json()).catch(() => null),
     ]).then(([ws, ath]) => {
       setWorkouts(Array.isArray(ws) ? ws : []);
       if (ath?.name) setAthlete(ath);

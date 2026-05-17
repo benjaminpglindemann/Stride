@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { Athlete, Week, ParsedWorkout, ChatMessage } from '@/types';
 import { sampleParsed } from '@/lib/mock-data';
 import { renderMd } from '@/lib/utils';
+import { apiFetch } from '@/lib/api-fetch';
 import { parseGarminCSV } from '@/lib/garmin-parse';
 
 interface Props {
@@ -69,10 +70,9 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
     let aiText = '';
     setThread(t => [...t, { role: 'ai', text: '' }]);
     try {
-      const res = await fetch('/api/coach/analyze', {
+      const res = await apiFetch('/api/coach/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ parsed }),
       });
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
@@ -103,10 +103,9 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
     let aiText = '';
     setThread(t => [...t, { role: 'ai', text: '' }]);
     try {
-      const res = await fetch('/api/coach/chat', {
+      const res = await apiFetch('/api/coach/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
           parsed,
           thread: nextThread.slice(0, -1),
@@ -204,10 +203,9 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
             onSend={sendFollowup}
             onBack={() => setStep('parsed')}
             onSave={async () => {
-              const res = await fetch('/api/workouts', {
+              const res = await apiFetch('/api/workouts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
                 body: JSON.stringify({ parsed, thread, note }),
               });
               if (!res.ok) {

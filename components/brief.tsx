@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { apiFetch } from '@/lib/api-fetch';
 import type { Prescription } from '@/types';
 
 interface BriefProps {
@@ -18,7 +19,7 @@ export default function Brief({ initialText, hasWorkouts, rx }: BriefProps) {
     setLoading(true);
     setBriefText('');
     try {
-      const res = await fetch('/api/coach/brief', { method: 'POST', credentials: 'include' });
+      const res = await apiFetch('/api/coach/brief', { method: 'POST' });
       if (!res.ok || !res.body) throw new Error('API error');
       const reader  = res.body.getReader();
       const decoder = new TextDecoder();

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { apiFetch } from '@/lib/api-fetch';
 import type { Athlete, Week, PlannerRec, ChatMessage } from '@/types';
 
 interface Props {
@@ -38,10 +39,9 @@ export default function PlannerCard({ athlete: _athlete, rec, weeks }: Props) {
     let aiText = '';
     setConv(c => [...c, { role: 'ai', text: '' }]);
     try {
-      const res = await fetch('/api/coach/plan', {
+      const res = await apiFetch('/api/coach/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ thread: nextConv.slice(0, -1), message: text, rec }),
       });
       if (!res.ok || !res.body) throw new Error('API error');

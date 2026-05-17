@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api-fetch';
 import Topbar from '@/components/topbar';
 import { parsePlanText, type PlanTemplate } from '@/lib/parse-plan';
 import type { Athlete } from '@/types';
@@ -29,7 +30,7 @@ export default function PlanView() {
   const [saving,   setSaving]   = useState(false);
 
   useEffect(() => {
-    fetch('/api/athlete/me', { credentials: 'include' })
+    apiFetch('/api/athlete/me')
       .then(r => r.ok ? r.json() : null)
       .then(a => {
         if (a) {
@@ -43,8 +44,7 @@ export default function PlanView() {
 
   const savePlan = async () => {
     setSaving(true);
-    await fetch('/api/athlete', {
-      method: 'PATCH', credentials: 'include',
+    await apiFetch('/api/athlete', {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ training_plan: draft }),
     });
