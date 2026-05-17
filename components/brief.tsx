@@ -18,7 +18,7 @@ export default function Brief({ initialText, hasWorkouts, rx }: BriefProps) {
     setLoading(true);
     setBriefText('');
     try {
-      const res = await fetch('/api/coach/brief', { method: 'POST' });
+      const res = await fetch('/api/coach/brief', { method: 'POST', credentials: 'include' });
       if (!res.ok || !res.body) throw new Error('API error');
       const reader  = res.body.getReader();
       const decoder = new TextDecoder();

@@ -72,9 +72,10 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
       const res = await fetch('/api/coach/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ parsed }),
       });
-      if (!res.ok || !res.body) throw new Error('API error');
+      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
       const reader  = res.body.getReader();
       const decoder = new TextDecoder();
       while (true) {
@@ -83,8 +84,9 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
         aiText += decoder.decode(value, { stream: true });
         setThread(t => [...t.slice(0, -1), { role: 'ai', text: aiText }]);
       }
-    } catch {
-      setThread(t => [...t.slice(0, -1), { role: 'ai', text: 'Could not reach the coach API. Check your connection and try again.' }]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'unknown error';
+      setThread(t => [...t.slice(0, -1), { role: 'ai', text: `Coach API error (${msg}). Check Vercel logs for details.` }]);
     } finally {
       setThinking(false);
     }
@@ -104,6 +106,7 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
       const res = await fetch('/api/coach/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           parsed,
           thread: nextThread.slice(0, -1),
@@ -111,7 +114,7 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
           initialAnalysis: initialAnalysisText,
         }),
       });
-      if (!res.ok || !res.body) throw new Error('API error');
+      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
       const reader  = res.body.getReader();
       const decoder = new TextDecoder();
       while (true) {
@@ -201,13 +204,18 @@ export default function UploadDrawer({ athlete, weeks, onClose, onSave }: Props)
             onSend={sendFollowup}
             onBack={() => setStep('parsed')}
             onSave={async () => {
-            await fetch('/api/workouts', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ parsed, thread, note }),
-            }).catch(() => {});
-            onSave(parsed, thread);
-          }}
+              const res = await fetch('/api/workouts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ parsed, thread, note }),
+              });
+              if (!res.ok) {
+                const body = await res.text().catch(() => '');
+                console.error('Save failed:', res.status, body);
+              }
+              onSave(parsed, thread);
+            }}
           />
         )}
       </aside>

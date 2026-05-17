@@ -41,6 +41,7 @@ export default function PlannerCard({ athlete: _athlete, rec, weeks }: Props) {
       const res = await fetch('/api/coach/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ thread: nextConv.slice(0, -1), message: text, rec }),
       });
       if (!res.ok || !res.body) throw new Error('API error');
